@@ -1,0 +1,70 @@
+name: 兼容性或错误反馈 / Bug report
+description: 提供版本、脱敏错误和复现步骤 / Report a compatibility issue or bug.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先阅读 INSTALL.md 和 docs/TROUBLESHOOTING.md。
+        Please read INSTALL.md and docs/TROUBLESHOOTING.md first.
+
+        不要公开密钥、认证请求头、Cookie 或完整会话。
+        Do not share API keys, authorization headers, cookies, or full conversations.
+
+        高风险场景请仅提供虚构描述，不执行危险操作。
+        Use fictional descriptions for high-risk cases; do not execute dangerous actions.
+
+  - type: input
+    id: dsh_version
+    attributes:
+      label: DSH 版本 / DSH version
+      placeholder: "例如 / e.g. 0.2.1-rc.3"
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_version
+    attributes:
+      label: 插件版本 / Plugin version
+      placeholder: "例如 / e.g. 0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: 系统与部署方式 / Operating system and setup
+      placeholder: "例如 Windows 桌面版 / e.g. Windows desktop"
+    validations:
+      required: true
+
+  - type: input
+    id: model_route
+    attributes:
+      label: 模型入口与接口类型 / Model and API type
+      description: |
+        不必公开服务地址；不清楚的项目可写“不确定”。
+        Omit private service URLs. Write "unknown" if unsure.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤与预期结果 / Steps and expected behavior
+      description: |
+        请说明是否启用原生自动审查和本插件，并提供最小、安全的复现步骤。
+        State whether native auto-review and this plugin are enabled, and provide minimal, safe reproduction steps.
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: 已脱敏错误或日志 / Redacted error or logs
+      description: |
+        保留错误码和尝试次数，删除私人信息和真实待审内容。
+        Keep error codes and attempt counts; remove private information and actual pending-action content.
+      render: text
+    validations:
+      required: true

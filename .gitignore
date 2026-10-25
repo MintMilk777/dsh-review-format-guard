@@ -1,0 +1,9 @@
+node_modules/
+validation/
+dist/
+*.tgz
+.env*
+scripts/live-matrix.mjs
+scripts/synthetic-cases.mjs
+scripts/isolated-host-live.mjs
+scripts/diagnose-upstream.mjs

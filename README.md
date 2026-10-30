@@ -45,6 +45,8 @@ It uses DSH's plugin interface without replacing the built-in reviewer or changi
 
 **Tested:** DSH `0.2.1-rc.3` on Windows.
 
+**RC5 checked:** On 2026-10-30, the installed Windows `0.2.1-rc.5` passed all 7 isolated host integration checks. Its auto-review source is identical to rc.3, as is rc.4's. The existing v0.1.0 plugin needs no code changes. The earlier live model tests were not repeated on rc.5.
+
 **May also work:** `0.2.1-alpha.2`, `alpha.3`, `alpha.4`, `alpha.5`, `rc.1`, and `rc.2`. Their auto-review source file is identical to `0.2.1-rc.3`. These are source-based candidates, not additional installation tests.
 
 There is no DSH version-range installation block. Unrecognized review policies and request structures pass through unchanged, so the plugin has no effect on them.

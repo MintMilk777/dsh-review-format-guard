@@ -4,6 +4,8 @@
 
 Plugin v0.1.0 was tested with DSH 0.2.1-rc.3 on Windows. Model tests were recorded on 2026-10-25; upstream source was compared on 2026-10-26.
 
+Follow-up check on 2026-10-30: the installed Windows desktop app, bundled runtime, and auto-review component all report 0.2.1-rc.5. The complete upstream auto-review source file is identical across rc.3, rc.4, and rc.5. The installed rc.5 policy and request structure are still recognized by v0.1.0, and all 7 isolated host integration checks passed using the installed rc.5 components. The existing plugin works without code changes. This check used simulated model responses, executed no real tools, and did not repeat the live model tests below.
+
 ## What was tested
 
 - **51 offline tests**, including 882 field/type combinations and 2,000 deterministic malformed inputs. Those combinations are already included in the 51 tests, not extra test totals.
@@ -45,3 +47,5 @@ The complete auto-review source file is identical across DSH 0.2.1-alpha.2, alph
 The package has no DSH version-range installation block. That does not establish compatibility with every host. The plugin still requires a matching policy fingerprint and request structure before it handles a request. In the upstream development commit checked on 2026-10-26, both have changed, so v0.1.0 passes those requests through unchanged rather than repairing them.
 
 Upstream source: [alpha.2](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-alpha.2/packages/experimental/auto-review/src/index.ts), [rc.3](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/packages/experimental/auto-review/src/index.ts), and the [checked development commit](https://github.com/deepseek-ai/deepseek-harness/blob/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/packages/experimental/auto-review/src/index.ts). Source equality was checked after normalizing CRLF line endings to LF.
+
+Additional comparisons: [rc.4](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.4/packages/experimental/auto-review/src/index.ts) and [rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.5/packages/experimental/auto-review/src/index.ts).

@@ -4,6 +4,8 @@
 
 插件 v0.1.0 的实测环境为 Windows / DSH 0.2.1-rc.3。模型测试记录于 2026-10-25，官方源码核对于 2026-10-26。
 
+2026-10-30 补充核验：本机桌面端、内置运行环境和自动审查组件均为 0.2.1-rc.5。官方 rc.4、rc.5 的整个自动审查源文件与 rc.3 完全相同；本机 rc.5 的审查政策和请求结构也仍被 v0.1.0 正确识别。使用 rc.5 实际安装的组件运行 7 项独立宿主接入检查，全部通过，现有插件无需修改代码即可适用。此次使用模拟模型返回，没有执行真实工具，也没有重跑下方的真实模型测试。
+
 已在标准插件安装及重启之后，通过独立进程载入实际安装版本，使用 DSH 自带的 LlmRuntime、PiAiAdapter、Cordis、BlockAssembler 和原生 readDecision 完成测试，实际请求已配置服务取得模型返回。所有动作仅为虚构审查描述，没有注册工具执行器，也没有提交到真实对话。
 
 模型名称来自本机服务声明，未验证服务背后真实模型身份。覆盖 OpenAI Completions 与 Responses 两类已配置接口；没有测试所有第三方服务或 HTTP 协议。排除了 6 个生图入口。
@@ -43,3 +45,5 @@
 安装包不限制 DSH 版本范围，但这不等于所有宿主都兼容。运行时仍要匹配政策指纹和请求结构；当时的官方开发分支已改变这两项，v0.1.0 会原样转发其审查请求，也就不会修复那类格式问题。
 
 官方源码：[alpha.2](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-alpha.2/packages/experimental/auto-review/src/index.ts)、[rc.3](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/packages/experimental/auto-review/src/index.ts) 与[已检查的开发提交](https://github.com/deepseek-ai/deepseek-harness/blob/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/packages/experimental/auto-review/src/index.ts)。文件对比时统一了 CRLF / LF 换行。
+
+新增对比：[rc.4](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.4/packages/experimental/auto-review/src/index.ts)、[rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.5/packages/experimental/auto-review/src/index.ts)。

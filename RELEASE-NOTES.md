@@ -12,6 +12,10 @@ Install **[`dsh-review-format-guard`](https://www.npmjs.com/package/dsh-review-f
 
 ### Compatibility / 兼容性
 
+**RC5 follow-up (2026-10-30):** All 7 isolated host integration checks passed with the installed Windows DSH **0.2.1-rc.5** components. Its complete auto-review source, and rc.4's, is identical to rc.3. Existing v0.1.0 works without code changes; live model tests were not repeated on rc.5.
+
+**RC5 补充核验（2026-10-30）：** 使用本机 Windows DSH **0.2.1-rc.5** 的实际组件完成 7 项独立宿主接入检查，全部通过。rc.4、rc.5 的整个自动审查源码均与 rc.3 相同。现有 v0.1.0 无需改代码即可适用；未在 rc.5 上重跑真实模型测试。
+
 Tested on Windows / DSH **0.2.1-rc.3**. Versions **0.2.1-alpha.2, alpha.3, alpha.4, alpha.5, rc.1, and rc.2** share the same auto-review source and may also work; they have not each been installation-tested. No DSH version-range installation block is imposed. Unrecognized review policies and request structures pass through unchanged.
 
 实测环境为 Windows / DSH **0.2.1-rc.3**。**0.2.1-alpha.2、alpha.3、alpha.4、alpha.5、rc.1、rc.2** 的自动审查源码相同，理论上可能适用，尚未逐个安装验证。安装不按 DSH 版本号拦截；未知审查政策和请求结构原样转发。

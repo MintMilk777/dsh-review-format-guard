@@ -27,7 +27,7 @@ Review response is not one complete JSON object
 dsh plugin --profile web add dsh-review-format-guard --ignore-scripts
 ```
 
-桌面版自带命令、本地安装包与卸载步骤见[安装指南](INSTALL.md)。也可以从 [Releases](https://github.com/MintMilk777/dsh-review-format-guard/releases/tag/v0.1.0) 下载预构建的 `.tgz` 安装包。
+桌面版自带命令、本地安装包与卸载步骤见[安装指南](INSTALL.md)。也可以从 [Releases](https://github.com/MintMilk777/dsh-review-format-guard/releases/tag/v0.1.1) 下载预构建的 `.tgz` 安装包。
 
 按提示重启，确认插件已启用，会话仍处于“自动审查”模式。先试一句“只查看当前工作目录，不修改文件”。
 
@@ -43,11 +43,9 @@ dsh plugin --profile web add dsh-review-format-guard --ignore-scripts
 
 ## 兼容范围
 
-**实测版本：** Windows 上的 DSH `0.2.1-rc.3`。
+**v0.1.1：** 使用 Windows / DSH `0.2.2-rc.1` 验证，76 项离线测试、8 项独立宿主检查、11 个模型入口的 49 个虚构审查样例全部通过。另有 15 组故障注入测试：先模拟畸形返回，再验证插件重试取得真实模型结论。
 
-**RC5 已核验：** 2026-10-30，使用本机 Windows `0.2.1-rc.5` 完成 7 项独立宿主接入检查，全部通过。其自动审查源码与 rc.3 完全相同，rc.4 也相同；现有 v0.1.0 无需修改代码。此前的真实模型测试未在 rc.5 上重跑。
-
-**理论上可能适用：** `0.2.1-alpha.2`、`alpha.3`、`alpha.4`、`alpha.5`、`rc.1` 和 `rc.2`。这些版本的自动审查源文件与 `rc.3` 完全相同，但尚未逐个做安装实测。
+旧版四栏目审查协议仍受支持。早期 v0.1.0 已在 DSH `0.2.1-rc.3` 和 `rc.5` 上核验；本次没有重新安装这些旧宿主。
 
 安装不受 DSH 版本号范围限制。运行时不认识的审查政策或请求结构会原样交回 DSH，插件不会处理这些请求。
 
@@ -63,7 +61,7 @@ dsh plugin --profile web add dsh-review-format-guard --ignore-scripts
 
 ## 开发与测试
 
-从源码目录运行 `npm test`，可执行 51 项离线测试，无需 API 密钥、DSH 或远端模型。宿主检查见[贡献指南](CONTRIBUTING.md)，实现细节见[技术说明](docs/TECHNICAL.md)。
+从源码目录运行 `npm test`，可执行 76 项离线测试，无需 API 密钥、DSH 或远端模型。宿主检查见[贡献指南](CONTRIBUTING.md)，实现细节见[技术说明](docs/TECHNICAL.md)。
 
 由 MintMilk777 发起并维护，使用 OpenAI Codex 协助开发与测试。
 

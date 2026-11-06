@@ -1,6 +1,6 @@
 {
   "name": "dsh-review-format-guard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH auto-review response format compatibility plugin: strict JSON validation, bounded retries, and preservation of valid denials. / DSH 自动审查返回格式兼容插件：严格校验 JSON、有限重试，保留合法拒绝。",
   "type": "module",
   "main": "./lib/index.js",
@@ -25,7 +25,7 @@
     "CONTRIBUTING.en.md"
   ],
   "scripts": {
-    "test": "node --test test/guard.test.mjs test/edge.test.mjs",
+    "test": "node --test test/guard.test.mjs test/edge.test.mjs test/ordered.test.mjs test/protocol-lifecycle.test.mjs",
     "test:host": "node scripts/run-host-tests.mjs"
   },
   "engines": {

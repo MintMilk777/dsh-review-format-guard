@@ -1,51 +1,39 @@
-# Compatibility and test results
+# Compatibility and tests
 
 [中文](COMPATIBILITY.md) · [Home](README.md)
 
-Plugin v0.1.0 was tested with DSH 0.2.1-rc.3 on Windows. Model tests were recorded on 2026-10-25; upstream source was compared on 2026-10-26.
+Plugin v0.1.1 was checked on 2026-11-06 with the installed Windows DSH 0.2.2-rc.1. It recognizes that host's ordered review protocol and retains the older four-section protocol. Unknown policies or request structures pass through unchanged. There is no DSH version-range installation block.
 
-Follow-up check on 2026-10-30: the installed Windows desktop app, bundled runtime, and auto-review component all report 0.2.1-rc.5. The complete upstream auto-review source file is identical across rc.3, rc.4, and rc.5. The installed rc.5 policy and request structure are still recognized by v0.1.0, and all 7 isolated host integration checks passed using the installed rc.5 components. The existing plugin works without code changes. This check used simulated model responses, executed no real tools, and did not repeat the live model tests below.
+## Checks performed
 
-## What was tested
+- **76 offline tests**, including 882 verdict field/type combinations and 2,000 deterministic malformed inputs. Those combinations are included in the test total.
+- **8 isolated host checks** using the installed request renderer, Cordis, BlockAssembler, and native decision parser.
+- **49 fictional review cases across 11 configured routes**, sent through the installed LlmRuntime and PiAiAdapter with the installed plugin. All 49 returned valid results matching the preset expectations. There were 51 requests: one transport failure on each of the two third-party DeepSeek/GLM routes recovered after one retry.
+- **15 fault-injection cases across three routes**: simulate non-JSON, duplicate members, conflicting conclusions, a missing finish, or a delta/snapshot disagreement on the first dispatch, then obtain a real model decision on retry. All 15 passed with 30 dispatches: 15 simulated responses and 15 real requests. This verifies the recovery chain, not the frequency of naturally occurring malformed responses.
+- **Standard installation and removal** in an isolated DSH home, including bundle registration cleanup, preservation of user overrides, and checks that the real desktop profile did not change.
 
-- **51 offline tests**, including 882 field/type combinations and 2,000 deterministic malformed inputs. Those combinations are already included in the 51 tests, not extra test totals.
-- **7 isolated host integration checks**, using the installed Cordis, BlockAssembler, and native review parser. They cover retries, denials, conflicting responses, reused stream objects, unloading, and re-enabling.
-- **67 fictional review cases across 17 configured model routes**, using the installed LlmRuntime, PiAiAdapter, and native parser after standard plugin installation and restart. No tool executor was registered and no test was sent to a live conversation.
+No tool executor was registered for review tests and no real conversation history was used. The DeepSeek official provider and disabled Gemini routes were excluded. Models were identified by their configured service names; their underlying identities were not independently verified.
 
-Model route names were reported by the configured services; their underlying model identities were not independently verified. The test covered the configured OpenAI Completions and Responses interfaces, not every provider or wire protocol. Six image-generation routes were excluded.
-
-| Configured model route | Passed / cases | Model requests |
+| Configured model route | Passed / cases | Real requests |
 |---|---:|---:|
-| gemini-3.8-flash-high | 3 / 3 | 3 |
-| gemini-3-flash | 3 / 3 | 3 |
-| gemini-3.5-flash-lite | 3 / 3 | 3 |
-| gemini-3.1-flash-lite | 3 / 3 | 3 |
-| claude-opus-4-6-thinking | 3 / 3 | 3 |
-| claude-sonnet-4-6 | 3 / 3 | 3 |
-| gpt-oss-120b-medium | 3 / 3 | 3 |
-| codex-auto-review | 3 / 3 | 3 |
 | gpt-6.1-sol | 3 / 3 | 3 |
 | gpt-6-astra | 3 / 3 | 3 |
+| gpt-6.1-terra | 3 / 3 | 3 |
 | gpt-6-sol | 3 / 3 | 3 |
 | gpt-6-luna | 3 / 3 | 3 |
 | gpt-5.6-sol | 3 / 3 | 3 |
 | gpt-5.6-terra | 3 / 3 | 3 |
 | gpt-5.6-luna | 3 / 3 | 3 |
-| deepseek-v4.1-flash | 11 / 11 | 11 |
-| glm-5.3-flash | 11 / 11 | 11 |
+| codex-auto-review | 3 / 3 | 3 |
+| deepseek-v4.1-flash | 11 / 11 | 12 |
+| glm-5.3-flash | 11 / 11 | 12 |
 
-All 67 cases passed in that run, with one model request per case and no retries. Retry behavior was covered separately with injected failures; this run does not show recovery from a real transient outage.
+The fault-injection routes were deepseek-v4.1-flash, glm-5.3-flash, and codex-auto-review. Tests covered read-only work, ordinary project writes, authorized and unauthorized deletion, revoked or mismatched authorization, production reads, and fictional sensitive-data exfiltration.
 
-## What these results do not show
+## Older hosts and limits
 
-Formatting checks do not establish that the model made the right authorization decision. Passing these examples does not guarantee every model, gateway, host version, or high-risk scenario.
+Earlier v0.1.0 checks used Windows DSH 0.2.1-rc.3 and rc.5. Their native auto-review source is identical to rc.4 and to 0.2.1-alpha.2 through alpha.5, rc.1, and rc.2. v0.1.1 retains this legacy protocol and tests it offline; it was not freshly installed on each older host.
 
-## Source-based version candidates
+Formatting checks do not guarantee correct authorization judgment. These examples do not establish compatibility with every model, gateway, host, or high-risk situation. Sustained outages and authentication failures can still stop a review.
 
-The complete auto-review source file is identical across DSH 0.2.1-alpha.2, alpha.3, alpha.4, alpha.5, rc.1, rc.2, and rc.3. The first six are reasonable candidates for trying this plugin, but only rc.3 was installation-tested. Earlier releases retain parts of the same protocol but differ in host integration; they have not been validated.
-
-The package has no DSH version-range installation block. That does not establish compatibility with every host. The plugin still requires a matching policy fingerprint and request structure before it handles a request. In the upstream development commit checked on 2026-10-26, both have changed, so v0.1.0 passes those requests through unchanged rather than repairing them.
-
-Upstream source: [alpha.2](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-alpha.2/packages/experimental/auto-review/src/index.ts), [rc.3](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/packages/experimental/auto-review/src/index.ts), and the [checked development commit](https://github.com/deepseek-ai/deepseek-harness/blob/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/packages/experimental/auto-review/src/index.ts). Source equality was checked after normalizing CRLF line endings to LF.
-
-Additional comparisons: [rc.4](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.4/packages/experimental/auto-review/src/index.ts) and [rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.5/packages/experimental/auto-review/src/index.ts).
+Upstream source: [0.2.2-rc.1](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/experimental/auto-review/src/index.ts), [0.2.1-rc.3](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/packages/experimental/auto-review/src/index.ts), and [0.2.1-rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.5/packages/experimental/auto-review/src/index.ts).

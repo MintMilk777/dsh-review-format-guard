@@ -1,4 +1,5 @@
 import * as portableSnapshot from '../fixtures/native-review-snapshot.mjs';
+import { REVIEW_POLICY as ORDERED_REVIEW_POLICY } from '../fixtures/ordered-review-snapshot.mjs';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import { createRequire } from 'node:module';
@@ -31,7 +32,19 @@ export function nativeFixture(BlockAssembler) {
   if (!BlockAssembler) return portableSnapshot;
   const source = readArchive('dsh/node_modules/@deepseek-ai/dsh-experimental-auto-review/lib/index.js');
   const testSource = source.replace(/^import .*;\r?\n/gm, '').replace(/^export \{[^\n]*\};?\r?$/gm, '');
-  return vm.runInNewContext(testSource + '\n;({ REVIEW_POLICY, parseDecision, readDecision });', { BlockAssembler });
+  return vm.runInNewContext(testSource + '\n;({ REVIEW_POLICY, parseDecision, readDecision, reviewMessages: typeof reviewMessages === "function" ? reviewMessages : undefined });', { BlockAssembler });
+}
+
+export function orderedReviewRequest(overrides = {}, mode = 'native') {
+  const text = value => ({ role: 'user', content: [{ type: 'text', text: typeof value === 'string' ? value : JSON.stringify(value) }] });
+  return {
+    provider: 'fixture-provider', model: 'fixture-model', system: ORDERED_REVIEW_POLICY, temperature: 0,
+    sessionId: 'fictional-review-session', purpose: 'auto-review',
+    messages: [text('ENVIRONMENT\n' + JSON.stringify({ cwd: 'D:/example' })),
+      text({ kind: 'tool-schema', role: 'fact', mode, name: 'working_directory', description: 'Fictional cwd read', parameters: {} }),
+      text({ kind: 'tool-call', role: 'fact', mode, name: 'working_directory', arguments: '{}' })],
+    ...overrides,
+  };
 }
 
 export function reviewRequest(overrides = {}) {

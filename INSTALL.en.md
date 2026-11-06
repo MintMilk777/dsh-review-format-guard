@@ -2,16 +2,16 @@
 
 [中文](INSTALL.md) · [Home](README.md) · [Troubleshooting](docs/TROUBLESHOOTING.en.md)
 
-These instructions cover plugin v0.1.0. The tested desktop setup is DSH 0.2.1-rc.3 on Windows. Other versions are discussed in [Compatibility](COMPATIBILITY.en.md).
+These instructions cover plugin v0.1.1. The current tested desktop setup is DSH 0.2.2-rc.1 on Windows. Other versions are discussed in [Compatibility](COMPATIBILITY.en.md).
 
 ## Download
 
-Download [dsh-review-format-guard-0.1.0.tgz](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.0/dsh-review-format-guard-0.1.0.tgz) from the release page. Keep the file as `.tgz`; do not unpack it. `SHA256SUMS.txt` contains the checksums for the attached plugin and source archives.
+Download [dsh-review-format-guard-0.1.1.tgz](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.1/dsh-review-format-guard-0.1.1.tgz) from the release page. Keep the file as `.tgz`; do not unpack it. `SHA256SUMS.txt` contains the checksums for the attached plugin and source archives.
 
 ## Option 1: DSH's plugin page
 
 1. Open DSH's plugin page and choose **Add plugin / Install a third-party plugin**. Labels can vary by DSH version.
-2. Enter the npm package name **`dsh-review-format-guard`**. You can also use the absolute path to the downloaded `.tgz`, or the [direct archive URL](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.0/dsh-review-format-guard-0.1.0.tgz).
+2. Enter the npm package name **`dsh-review-format-guard`**. You can also use the absolute path to the downloaded `.tgz`, or the [direct archive URL](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.1/dsh-review-format-guard-0.1.1.tgz).
 3. Review the package details and confirm installation. Restart if DSH asks you to, then check that `dsh-review-format-guard` is enabled.
 
 If your version's dialog does not accept the package name or archive, use the bundled command below.
@@ -55,13 +55,13 @@ Turn the plugin off on DSH's plugin page and restart if requested. Once DSH unlo
 Fully quit Desktop, then run this from its installation folder:
 
 ```powershell
-& "./resources/runtime/cli/bin/dsh.cmd" plugin --profile desktop remove dsh-review-format-guard --ignore-scripts
+& "./resources/runtime/cli/bin/dsh.cmd" plugin --profile desktop remove dsh-review-format-guard --config.ignore-scripts=true
 ```
 
 For another profile, use its matching command, for example:
 
 ```sh
-dsh plugin --profile web remove dsh-review-format-guard --ignore-scripts
+dsh plugin --profile web remove dsh-review-format-guard --config.ignore-scripts=true
 ```
 
 Reopen DSH afterward. This removes this plugin, not the built-in auto-review component.
@@ -69,7 +69,7 @@ Reopen DSH afterward. This removes this plugin, not the built-in auto-review com
 ## Verify a download (optional)
 
 ```powershell
-Get-FileHash -Algorithm SHA256 "C:/path/to/dsh-review-format-guard-0.1.0.tgz"
+Get-FileHash -Algorithm SHA256 "C:/path/to/dsh-review-format-guard-0.1.1.tgz"
 ```
 
 Compare the result with the matching filename in the release's `SHA256SUMS.txt`. Download the checksum file and archive from the same release.

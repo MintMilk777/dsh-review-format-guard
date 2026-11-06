@@ -1,49 +1,39 @@
-# 兼容性与验证范围
+# 兼容性与测试
 
 [English](COMPATIBILITY.en.md) · [首页](README-zh-CN.md)
 
-插件 v0.1.0 的实测环境为 Windows / DSH 0.2.1-rc.3。模型测试记录于 2026-10-25，官方源码核对于 2026-10-26。
+插件 v0.1.1 于 2026-11-06 使用本机 Windows / DSH 0.2.2-rc.1 核验，支持该版本的多消息审查协议，同时保留旧版四栏目协议。未知政策或请求结构仍原样转发。安装包不按 DSH 版本范围拦截。
 
-2026-10-30 补充核验：本机桌面端、内置运行环境和自动审查组件均为 0.2.1-rc.5。官方 rc.4、rc.5 的整个自动审查源文件与 rc.3 完全相同；本机 rc.5 的审查政策和请求结构也仍被 v0.1.0 正确识别。使用 rc.5 实际安装的组件运行 7 项独立宿主接入检查，全部通过，现有插件无需修改代码即可适用。此次使用模拟模型返回，没有执行真实工具，也没有重跑下方的真实模型测试。
+## 已完成的检查
 
-已在标准插件安装及重启之后，通过独立进程载入实际安装版本，使用 DSH 自带的 LlmRuntime、PiAiAdapter、Cordis、BlockAssembler 和原生 readDecision 完成测试，实际请求已配置服务取得模型返回。所有动作仅为虚构审查描述，没有注册工具执行器，也没有提交到真实对话。
+- **76 项离线测试**，含 882 组结论字段/类型组合及 2000 组确定性的畸形输入；这些组合包含在测试总数内。
+- **8 项独立宿主检查**，使用实际安装的请求生成函数、Cordis、BlockAssembler 和原生结论解析器。
+- **11 个模型入口、49 个虚构审查样例**，通过本机 LlmRuntime、PiAiAdapter 和已安装插件请求真实服务。49 个结果均格式合格且符合样例预设判断，共 51 次请求：第三方 DeepSeek 和 GLM 各有一次连接故障，均重试一次后恢复。
+- **3 个入口、15 组故障注入测试**：首轮分别模拟非 JSON、重复字段、结论冲突、缺少结束标记或增量与最终文本不一致，再由插件重试请求真实模型。15 组全部通过，共 30 次调用，其中 15 次为模拟返回、15 次为真实请求。这验证恢复链路，不代表真实上游畸形返回的发生频率。
+- **标准安装与卸载**：在独立 DSH 目录中验证挂载记录清理、用户覆盖配置保留，并确认真实桌面配置未变。
 
-模型名称来自本机服务声明，未验证服务背后真实模型身份。覆盖 OpenAI Completions 与 Responses 两类已配置接口；没有测试所有第三方服务或 HTTP 协议。排除了 6 个生图入口。
+审查测试未注册工具执行器，没有使用真实会话历史。排除了 DeepSeek 官方服务和已关闭的 Gemini。模型名称取自配置中的服务入口，未独立确认背后真实模型身份。
 
-| 模型入口名称 | 通过 / 样例数 | 模型请求次数 |
+| 模型入口 | 通过 / 样例数 | 真实请求次数 |
 |---|---:|---:|
-| gemini-3.8-flash-high | 3 / 3 | 3 |
-| gemini-3-flash | 3 / 3 | 3 |
-| gemini-3.5-flash-lite | 3 / 3 | 3 |
-| gemini-3.1-flash-lite | 3 / 3 | 3 |
-| claude-opus-4-6-thinking | 3 / 3 | 3 |
-| claude-sonnet-4-6 | 3 / 3 | 3 |
-| gpt-oss-120b-medium | 3 / 3 | 3 |
-| codex-auto-review | 3 / 3 | 3 |
 | gpt-6.1-sol | 3 / 3 | 3 |
 | gpt-6-astra | 3 / 3 | 3 |
+| gpt-6.1-terra | 3 / 3 | 3 |
 | gpt-6-sol | 3 / 3 | 3 |
 | gpt-6-luna | 3 / 3 | 3 |
 | gpt-5.6-sol | 3 / 3 | 3 |
 | gpt-5.6-terra | 3 / 3 | 3 |
 | gpt-5.6-luna | 3 / 3 | 3 |
-| deepseek-v4.1-flash | 11 / 11 | 11 |
-| glm-5.3-flash | 11 / 11 | 11 |
+| codex-auto-review | 3 / 3 | 3 |
+| deepseek-v4.1-flash | 11 / 11 | 12 |
+| glm-5.3-flash | 11 / 11 | 12 |
 
-67 个样例全部通过，每个样例请求一次，没有触发重试。重试行为另用模拟故障验证；这轮模型测试不能证明真实服务故障后的恢复能力。
+故障注入使用 deepseek-v4.1-flash、glm-5.3-flash 和 codex-auto-review。样例覆盖普通读取、项目内写入、已授权及未授权删除、撤回或目标不符的授权、生产读取，以及虚构的敏感信息外发。
 
-离线验证：51 项全部通过，其中包含 882 组字段/类型组合与 2000 组确定性的畸形输入。并发、取消、卸载、重新启用、明确拒绝不重试、认证失败不重试、结论冲突、重复字段及大小/时间上限均覆盖。另有 7 组真实宿主接入测试全部通过，使用了本机实际的审查解析器，并比较了原生政策与受支持快照。
+## 旧宿主与限制
 
-## 这些结果不能说明什么
+早期 v0.1.0 曾在 Windows / DSH 0.2.1-rc.3 和 rc.5 上核验。两者的原生自动审查源码与 rc.4，以及 0.2.1-alpha.2 至 alpha.5、rc.1、rc.2 相同。v0.1.1 保留旧协议并有离线回归测试，本轮未在这些旧宿主上逐个重新安装。
 
-这些结果不保证所有模型、中转服务或高风险场景都能正常工作，也不能证明模型的授权判断正确。
+格式正确不保证模型判断正确；通过这些样例不能证明所有模型、中转、宿主或高风险情形都适用。持续不可用的服务和认证失败仍可能导致审查报错。
 
-## 源码对比支持的候选版本
-
-0.2.1-alpha.2、alpha.3、alpha.4、alpha.5、rc.1、rc.2 的自动审查源文件与实测 rc.3 完全相同，因此列为理论上可能适用的版本，不算新增安装实测。更早版本虽保留部分相同协议，宿主接入已有差异，暂不承诺可用。
-
-安装包不限制 DSH 版本范围，但这不等于所有宿主都兼容。运行时仍要匹配政策指纹和请求结构；当时的官方开发分支已改变这两项，v0.1.0 会原样转发其审查请求，也就不会修复那类格式问题。
-
-官方源码：[alpha.2](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-alpha.2/packages/experimental/auto-review/src/index.ts)、[rc.3](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/packages/experimental/auto-review/src/index.ts) 与[已检查的开发提交](https://github.com/deepseek-ai/deepseek-harness/blob/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/packages/experimental/auto-review/src/index.ts)。文件对比时统一了 CRLF / LF 换行。
-
-新增对比：[rc.4](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.4/packages/experimental/auto-review/src/index.ts)、[rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.5/packages/experimental/auto-review/src/index.ts)。
+官方源码：[0.2.2-rc.1](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/experimental/auto-review/src/index.ts)、[0.2.1-rc.3](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/packages/experimental/auto-review/src/index.ts)、[0.2.1-rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.5/packages/experimental/auto-review/src/index.ts)。

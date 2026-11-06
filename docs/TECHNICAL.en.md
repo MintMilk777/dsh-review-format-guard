@@ -6,11 +6,11 @@ The plugin registers a prepended `llm/stream` listener. It does not replace DSH'
 
 ## Request recognition
 
-`nativeReviewRequest` checks the SHA-256 of the native system policy, temperature zero, an absent or empty tools list, and one user text message containing ENVIRONMENT, PROJECT_INSTRUCTIONS, FILTERED_HISTORY, and PENDING_ACTION. The JSON sections must also have the expected basic shape. Ordinary chat, third-party review prompts, and unknown policy versions pass through untouched.
+`nativeReviewRequest` checks a known SHA-256 policy fingerprint, temperature zero, an absent or empty tools list, and the matching request structure. The legacy protocol uses one four-section user message. The ordered protocol uses an environment message followed by JSON records, ending in a tool call with a preceding matching schema. If a purpose marker exists, it must be `auto-review`. Ordinary chat, third-party review prompts, and unknown policy versions pass through untouched.
 
 By default, provider/model names do not decide whether a request is handled. The optional `providerIds` list can narrow provider routes; an empty list leaves all recognized native-review routes eligible.
 
-The original policy and data are retained. The plugin repeats that same policy after the data and asks for the single decision object. This may help gateways that ignore or replace system messages, but it still relies on model compliance. It is not a deterministic repair of meaning.
+The original policy and data are retained. For legacy requests the policy is repeated after the four sections. For ordered requests it is repeated only in the first environment message; later JSON records, source roles, session identity and purpose remain unchanged, with the pending call still last. This may help gateways that ignore or replace system messages, but it still relies on model compliance. It is not a deterministic repair of meaning.
 
 ## Response handling
 

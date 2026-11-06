@@ -12,7 +12,7 @@ Use Node.js 22.19.0 or newer and run from the source checkout:
 npm test
 ```
 
-There are 51 tests, including 882 field/type combinations and 2,000 deterministic malformed inputs. The combinations are part of those tests, not additional totals. No dependency install, DSH installation, credentials, or model calls are needed. GitHub Actions runs the offline suite on Windows and Ubuntu with Node.js 22 and 24.
+There are 76 tests, including 882 field/type combinations and 2,000 deterministic malformed inputs. The combinations are part of those tests, not additional totals. No dependency install, DSH installation, credentials, or model calls are needed. GitHub Actions runs the offline suite on Windows and Ubuntu with Node.js 22 and 24.
 
 ## Optional host integration checks
 

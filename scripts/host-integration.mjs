@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
-import { archivePath, nativeFixture, reviewRequest } from './host-fixture.mjs';
+import { archivePath, nativeFixture, reviewRequest as legacyReviewRequest, orderedReviewRequest } from './host-fixture.mjs';
+import { nativeReviewRequest, reinforceReviewRequest } from '../lib/protocol.js';
 const guard = await import(process.env.REVIEW_GUARD_ENTRY
   ? pathToFileURL(process.env.REVIEW_GUARD_ENTRY).href
   : new URL('../lib/index.js', import.meta.url).href);
@@ -9,7 +10,16 @@ const host = suffix => pathToFileURL(archivePath + '/dsh/node_modules/@deepseek-
 const { Context } = await import(host('cordis/lib/index.js'));
 const { BlockAssembler } = await import(host('dsh-llm/lib/index.js'));
 const { readDecision } = nativeFixture(BlockAssembler);
+const reviewRequest = nativeFixture(BlockAssembler).REVIEW_POLICY === legacyReviewRequest().system ? legacyReviewRequest : orderedReviewRequest;
 assert.equal(nativeFixture(BlockAssembler).REVIEW_POLICY, reviewRequest().system, 'The installed native review policy differs from the supported snapshot.');
+const renderer = nativeFixture(BlockAssembler).reviewMessages;
+if (renderer) {
+  const request = reviewRequest();
+  request.messages = renderer({ cwd: 'D:/fictional-only', history: request.messages.slice(1).map(message => JSON.parse(message.content[0].text)) });
+  assert.equal(nativeReviewRequest(request), true);
+  assert.equal(reinforceReviewRequest(request).messages.at(-1), request.messages.at(-1));
+  console.log('PASS actual host request renderer: recognized envelope and unchanged final pending call');
+}
 const allow = '{"risk":"low","decision":"allow"}';
 const deny = '{"risk":"high","decision":"deny","reason":"Do not execute"}';
 function response(text) {

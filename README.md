@@ -27,14 +27,14 @@ Install **`dsh-review-format-guard`** from DSH's plugin page. For a regular `dsh
 dsh plugin --profile web add dsh-review-format-guard --ignore-scripts
 ```
 
-For Desktop's bundled command, local archives, and uninstall steps, see the [installation guide](INSTALL.en.md). A prebuilt `.tgz` is also available in [Releases](https://github.com/MintMilk777/dsh-review-format-guard/releases/tag/v0.1.0).
+For Desktop's bundled command, local archives, and uninstall steps, see the [installation guide](INSTALL.en.md). A prebuilt `.tgz` is also available in [Releases](https://github.com/MintMilk777/dsh-review-format-guard/releases/tag/v0.1.1).
 
 Restart DSH if prompted, check that the plugin is enabled, and keep the conversation in **Auto review** mode. Try a simple read-only request, such as “Show the current working directory without changing any files.”
 
 ## What it changes
 
 - Handles requests that match the known native review policy and message structure, without a provider or model-name allowlist by default.
-- Keeps the original policy and pending-action data, then repeats that same policy after the data to help services that mishandle the system message.
+- Keeps the native policy and pending-action data. For ordered reviews, repeats the policy in the first environment message while leaving all history records and the final pending call unchanged. Older four-section requests retain their original handling.
 - Buffers the response before returning it to DSH. It accepts only a complete decision that follows the native field rules.
 - Can remove a JSON code fence, surrounding whitespace, or a leading byte-order mark. It also handles a checked whitespace-only difference in reasoning snapshots. It never searches prose, reasoning, or tool-call markup for an approval to extract.
 - Makes at most three attempts by default, including retries for some temporary service errors. Each attempt has a default 60-second limit; some failures stop sooner.
@@ -43,11 +43,9 @@ It uses DSH's plugin interface without replacing the built-in reviewer or changi
 
 ## Compatibility
 
-**Tested:** DSH `0.2.1-rc.3` on Windows.
+**v0.1.1:** Tested on Windows with DSH `0.2.2-rc.1`: 76 offline tests, 8 isolated host checks, and 49 fictional review cases across 11 configured model routes passed. Another 15 fault-injection cases confirmed that malformed first responses are rejected before a retry obtains a real model decision.
 
-**RC5 checked:** On 2026-10-30, the installed Windows `0.2.1-rc.5` passed all 7 isolated host integration checks. Its auto-review source is identical to rc.3, as is rc.4's. The existing v0.1.0 plugin needs no code changes. The earlier live model tests were not repeated on rc.5.
-
-**May also work:** `0.2.1-alpha.2`, `alpha.3`, `alpha.4`, `alpha.5`, `rc.1`, and `rc.2`. Their auto-review source file is identical to `0.2.1-rc.3`. These are source-based candidates, not additional installation tests.
+The older four-section review protocol is still supported. Earlier v0.1.0 checks used DSH `0.2.1-rc.3` and `rc.5`; these installations were not repeated for v0.1.1.
 
 There is no DSH version-range installation block. Unrecognized review policies and request structures pass through unchanged, so the plugin has no effect on them.
 
@@ -63,7 +61,7 @@ To stop using it, disable it in DSH or follow the [uninstall instructions](INSTA
 
 ## Development
 
-Run `npm test` from the source checkout with a supported Node.js version. The 51 offline tests use only Node.js built-ins and need no API key, DSH installation, or model requests. Optional host integration checks are described in [CONTRIBUTING.en.md](CONTRIBUTING.en.md). See [the implementation notes](docs/TECHNICAL.en.md) for the request and stream handling.
+Run `npm test` from the source checkout with a supported Node.js version. The 76 offline tests use only Node.js built-ins and need no API key, DSH installation, or model requests. Optional host integration checks are described in [CONTRIBUTING.en.md](CONTRIBUTING.en.md). See [the implementation notes](docs/TECHNICAL.en.md) for the request and stream handling.
 
 Initiated and maintained by MintMilk777, with development and testing assistance from OpenAI Codex.
 

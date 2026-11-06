@@ -2,16 +2,16 @@
 
 [English](INSTALL.en.md) · [首页](README-zh-CN.md) · [排查问题](docs/TROUBLESHOOTING.md)
 
-此页对应插件 v0.1.0，安装实测环境为 Windows / DSH 0.2.1-rc.3。其他版本的情况见[兼容范围](COMPATIBILITY.md)。
+此页对应插件 v0.1.1，本轮验证环境为 Windows / DSH 0.2.2-rc.1。其他版本的情况见[兼容范围](COMPATIBILITY.md)。
 
 ## 下载
 
-在 [v0.1.0 发布页](https://github.com/MintMilk777/dsh-review-format-guard/releases/tag/v0.1.0)下载 `dsh-review-format-guard-0.1.0.tgz`，保持原文件，不要解压。`SHA256SUMS.txt` 用来核对附件的完整性。
+在 [v0.1.1 发布页](https://github.com/MintMilk777/dsh-review-format-guard/releases/tag/v0.1.1)下载 `dsh-review-format-guard-0.1.1.tgz`，保持原文件，不要解压。`SHA256SUMS.txt` 用来核对附件的完整性。
 
 ## 方法一：使用插件页面
 
 1. 打开 DSH 插件页面，选择“添加插件 / 安装第三方插件”，具体名称可能随版本变化。
-2. 填写 npm 包名 **`dsh-review-format-guard`**。也可以填写下载的 `.tgz` 文件的完整路径，或[安装包直链](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.0/dsh-review-format-guard-0.1.0.tgz)。
+2. 填写 npm 包名 **`dsh-review-format-guard`**。也可以填写下载的 `.tgz` 文件的完整路径，或[安装包直链](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.1/dsh-review-format-guard-0.1.1.tgz)。
 3. 核对包信息并确认安装。按提示重启，确认 `dsh-review-format-guard` 已启用。
 
 如果你的版本不接受包名或安装包路径，可使用下面的自带命令。
@@ -55,13 +55,13 @@ dsh plugin --profile web add dsh-review-format-guard --ignore-scripts
 完全退出 DSH，在它的安装文件夹运行：
 
 ```powershell
-& "./resources/runtime/cli/bin/dsh.cmd" plugin --profile desktop remove dsh-review-format-guard --ignore-scripts
+& "./resources/runtime/cli/bin/dsh.cmd" plugin --profile desktop remove dsh-review-format-guard --config.ignore-scripts=true
 ```
 
 其他配置使用对应入口，例如：
 
 ```sh
-dsh plugin --profile web remove dsh-review-format-guard --ignore-scripts
+dsh plugin --profile web remove dsh-review-format-guard --config.ignore-scripts=true
 ```
 
 随后重新打开 DSH。移除本插件不会卸载内置自动审查。
@@ -69,7 +69,7 @@ dsh plugin --profile web remove dsh-review-format-guard --ignore-scripts
 ## 核对下载文件（可选）
 
 ```powershell
-Get-FileHash -Algorithm SHA256 "C:/path/to/dsh-review-format-guard-0.1.0.tgz"
+Get-FileHash -Algorithm SHA256 "C:/path/to/dsh-review-format-guard-0.1.1.tgz"
 ```
 
 把结果与同一发布页的 `SHA256SUMS.txt` 对照，文件名也要一致。

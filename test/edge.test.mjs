@@ -5,6 +5,78 @@ import { normalizeDecision, nativeReviewRequest } from '../lib/protocol.js';
 import { inspectReviewChunks } from '../lib/stream.js';
 import { allow, deny, chunks, stream, collect, harness } from '../scripts/harness-fixture.mjs';
 
+test('normalization preserves every delta metadata record and removes changed-text signatures', async () => {
+  const raw = '```json\n' + deny + '\n```';
+  const input = [
+    {type:'text-delta',index:0,text:raw.slice(0,12),metadata:{part:1},signature:'old-1'},
+    {type:'text-delta',index:0,text:raw.slice(12),metadata:{part:2},signature:'old-2'},
+    {type:'block-end',index:0,block:{type:'text',text:raw,metadata:{source:'adapter'},signature:'old-block'}},
+    {type:'finish',reason:{kind:'stop'},replayState:{old:true}},
+  ];
+  const original = JSON.stringify(input);
+  const h = harness([input], {retries:0});
+  try {
+    const out = await collect(h.ctx.llm.stream(reviewRequest()));
+    const deltas = out.filter(c=>c.type==='text-delta');
+    assert.deepEqual(deltas.map(c=>c.metadata), [{part:1},{part:2}]);
+    assert.equal(deltas.map(c=>c.text).join(''), deny);
+    assert.ok(deltas.every(c=>!Object.hasOwn(c,'signature')));
+    const block = out.find(c=>c.type==='block-end').block;
+    assert.equal(Object.hasOwn(block,'signature'),false);
+    assert.deepEqual(block.metadata,{source:'adapter'});
+    assert.equal(Object.hasOwn(out.at(-1),'replayState'),false);
+    assert.equal(inspectReviewChunks(out).decision.decision,'deny');
+    assert.equal(JSON.stringify(input),original);
+  } finally { h.dispose(); }
+});
+
+for (const tail of [[' \n'], ['', ' \n', ''], ['', '']]) {
+  test('block-wide signatures follow whole-text changes for tail ' + JSON.stringify(tail), async () => {
+    const texts = [deny, ...tail];
+    const changed = tail.join('') !== '';
+    const input = [
+      ...texts.map((text, part) => ({type:'text-delta',index:0,text,signature:'block-signature',metadata:{part}})),
+      {type:'block-end',index:0,block:{type:'text',text:texts.join(''),signature:'block-signature',metadata:{source:'adapter'}}},
+      {type:'finish',reason:{kind:'stop'}},
+    ];
+    const original = JSON.stringify(input);
+    const h = harness([input], {retries:0});
+    try {
+      const out = await collect(h.ctx.llm.stream(reviewRequest()));
+      const deltas = out.filter(c=>c.type==='text-delta');
+      assert.deepEqual(deltas.map(c=>c.metadata),texts.map((_,part)=>({part})));
+      assert.equal(deltas.map(c=>c.text).join(''),deny);
+      assert.ok(deltas.every(c=>Object.hasOwn(c,'signature') === !changed));
+      const block = out.find(c=>c.type==='block-end').block;
+      assert.equal(Object.hasOwn(block,'signature'),!changed);
+      assert.deepEqual(block.metadata,{source:'adapter'});
+      if (!changed) assert.deepEqual(out,input);
+      assert.equal(inspectReviewChunks(out).decision.decision,'deny');
+      assert.equal(h.calls.length,1);
+      assert.equal(JSON.stringify(input),original);
+    } finally { h.dispose(); }
+  });
+}
+
+test('reasoning-only repair leaves verdict delta boundaries and signatures unchanged', async () => {
+  const verdict = [
+    {type:'text-delta',index:1,text:deny.slice(0,12),metadata:{part:1},signature:'keep-1'},
+    {type:'text-delta',index:1,text:deny.slice(12),metadata:{part:2},signature:'keep-2'},
+    {type:'block-end',index:1,block:{type:'text',text:deny,signature:'keep-block'}},
+  ];
+  const h = harness([[
+    {type:'reasoning-delta',index:0,text:'Analysis\n'},
+    {type:'block-end',index:0,block:{type:'reasoning',text:'Analysis',signature:'old'}},
+    ...verdict,
+    {type:'finish',reason:{kind:'stop'}},
+  ]], {retries:0});
+  try {
+    const out = await collect(h.ctx.llm.stream(reviewRequest()));
+    assert.deepEqual(out.filter(c=>c.index===1),verdict);
+    assert.equal(inspectReviewChunks(out).decision.decision,'deny');
+  } finally { h.dispose(); }
+});
+
 test('verdict acceptance agrees with the host across a full field/type matrix', () => {
   const native = nativeFixture().parseDecision;
   const risks = ['low', 'medium', 'high', 'LOW', null, 0, true, {}, []];
@@ -181,7 +253,7 @@ test('repairs only peripheral whitespace in reasoning snapshots and discards sta
   const input=[
     {type:'block-start',index:0,blockType:'reasoning'},
     {type:'reasoning-delta',index:0,text:'Reasoning only.\n\n'},
-    {type:'block-end',index:0,block:{type:'reasoning',text:'Reasoning only.',signature:'stale'}},
+    {type:'block-end',index:0,block:{type:'reasoning',text:'Reasoning only.',signature:'stale',metadata:{source:'fixed-adapter',format:1},label:'analysis'}},
     ...chunks(deny).map(c=>c.index===undefined?{...c,replayState:{stale:true}}:{...c,index:1}),
   ];
   const original=JSON.stringify(input), h=harness([input]);
@@ -189,6 +261,11 @@ test('repairs only peripheral whitespace in reasoning snapshots and discards sta
   assert.equal(h.calls.length,1);
   assert.equal(inspectReviewChunks(out).decision.decision,'deny');
   assert.equal(out.find(c=>c.type==='block-end').block.text,'Reasoning only.\n\n');
+  const repaired = out.find(c=>c.type==='block-end').block;
+  assert.deepEqual(repaired.metadata, {source:'fixed-adapter',format:1});
+  assert.equal(repaired.label,'analysis');
+  assert.equal(Object.hasOwn(repaired,'signature'),false);
+  assert.equal(Object.hasOwn(out.at(-1),'replayState'),false);
   assert.equal(JSON.stringify(out).includes('stale'),false);
   assert.equal(JSON.stringify(input),original);
 });
@@ -219,4 +296,18 @@ test('native SERVER and TRANSPORT errors retry within the same bound, while AUTH
   else assert.equal(out.at(-1).reason.kind,'error');
   assert.equal(JSON.stringify(out).includes('Private upstream message'),false);
  }
+});
+
+test('unchanged reasoning retains its signature and fixed metadata', async () => {
+  const input = [
+    {type:'reasoning-delta',index:0,text:'Unchanged reasoning'},
+    {type:'block-end',index:0,block:{type:'reasoning',text:'Unchanged reasoning',signature:'original-signature',metadata:{source:'fixed-adapter'}}},
+    ...chunks(deny).map(c=>c.index===undefined?{...c,replayState:{original:true}}:{...c,index:1}),
+  ];
+  const h = harness([input]);
+  try {
+    const out = await collect(h.ctx.llm.stream(reviewRequest()));
+    assert.deepEqual(out, input);
+    assert.equal(h.calls.length,1);
+  } finally { h.dispose(); }
 });

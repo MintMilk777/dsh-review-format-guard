@@ -1,5 +1,16 @@
 # Changelog / 更新记录
 
+## 0.1.2
+
+- Add per-attempt total / first-content / idle deadlines of 180 / 120 / 30 seconds, preserving explicit older settings.
+- Merge adjacent plain fragments with separate retained-event, raw-event, content, replay, buffer, and conservative memory budgets.
+- End definite failures promptly with safe classifications and attempt history; preserve valid denials and bounded retries, with no retry on user cancellation.
+- Keep cancellation and unload responsive, clean up per-read listeners, and preserve primary failures when closing a stream fails.
+- Preserve later-fragment metadata when removing JSON fences, clear stale signatures on changed text, and leave unchanged verdict fragments and signatures intact when only reasoning whitespace needs correction.
+- Distinguish current verification from historical results, including live first-content timeouts. Final test totals and packaged checks are recorded separately in the compatibility guide.
+
+每次尝试采用 180 秒总期限、120 秒首内容和 30 秒空闲期限，旧显式配置仍有效。相邻纯碎片合并，各项资源分别计量。明确错误及时结束并保留安全分类与尝试历史；合法拒绝保留，用户取消不重试，资源超限将总尝试上限收为两次，其他可重试错误最多三次（第三次才首次超限则直接结束）。改善取消、卸载与读取监听清理，关闭错误不覆盖主因。去除结论围栏时保留后续元数据、清除修改文字旧签名；仅修思考空白时保留无需修改的结论片段与签名。兼容说明区分当前与历史验证，如实记录首内容超时；最终通过 163 项离线测试、16 项宿主检查、112 次保存返回回放及打包后的隔离安装卸载检查。
+
 ## 0.1.1
 
 - Support the ordered native auto-review protocol used by DSH 0.2.2-rc.1 while retaining legacy request support.

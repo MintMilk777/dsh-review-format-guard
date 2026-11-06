@@ -101,7 +101,100 @@ assert.equal(backendCalls,1);
 backendFactory=undefined;
 console.log('PASS real native parser: reasoning whitespace repaired while refusal remains unchanged');
 
-await fiber.dispose();
+// Compare the guarded event stream with the installed assembler and parser,
+// including normalization, metadata-bearing fragments and plain-delta merging.
+for (const scenario of ['normalized metadata', 'trimmed block signatures', 'unchanged block signatures', 'reasoning-only repair', 'merged deltas']) {
+  const raw = scenario === 'normalized metadata' ? '```json\n' + deny + '\n```'
+    : scenario === 'trimmed block signatures' ? deny + ' \n' : deny;
+  const fragments = scenario === 'trimmed block signatures' ? [deny, '', ' \n', '']
+    : scenario === 'unchanged block signatures' ? [deny, '', ''] : Array.from(raw);
+  const deltas = fragments.map((text, part) => ({
+    type:'text-delta', index:1, text,
+    ...(scenario === 'merged deltas' ? {} : {metadata:{part},signature:'original-' + part}),
+  }));
+  const input = [
+    ...(scenario === 'reasoning-only repair' ? [
+      {type:'reasoning-delta',index:0,text:'Analysis\n'},
+      {type:'block-end',index:0,block:{type:'reasoning',text:'Analysis',signature:'old'}},
+    ] : []),
+    ...deltas,
+    {type:'block-end',index:1,block:{type:'text',text:raw,metadata:{source:'adapter'},signature:'original-block'}},
+    {type:'finish',reason:{kind:'stop'}},
+  ];
+  backendCalls = 0;
+  backendFactory = () => (async function* () { yield* input; })();
+  const output = [];
+  for await (const chunk of llm.stream(reviewRequest())) output.push(chunk);
+  const assembler = new BlockAssembler();
+  for (const chunk of output) assembler.push(chunk);
+  assert.equal(assembler.blocks().at(-1).text, deny);
+  assert.equal((await readDecision((async function* () { yield* output; })())).decision,'deny');
+  const actualDeltas = output.filter(c=>c.type==='text-delta');
+  assert.equal(actualDeltas.map(c=>c.text).join(''),deny);
+  if (scenario === 'normalized metadata' || scenario === 'trimmed block signatures') {
+    assert.deepEqual(actualDeltas.map(c=>c.metadata),deltas.map(c=>c.metadata));
+    assert.ok(actualDeltas.every(c=>!Object.hasOwn(c,'signature')));
+    assert.equal(Object.hasOwn(assembler.blocks().at(-1),'signature'),false);
+  } else if (scenario === 'reasoning-only repair' || scenario === 'unchanged block signatures') {
+    assert.deepEqual(actualDeltas,deltas);
+    assert.equal(assembler.blocks().at(-1).signature,'original-block');
+  } else assert.equal(actualDeltas.length,1);
+  assert.equal(backendCalls,1);
+  console.log('PASS real native assembler and parser: ' + scenario);
+}
+backendFactory = undefined;
+
+
+backendCalls = 0;
+let failureReads = 0;
+backendFactory = () => ({ [Symbol.asyncIterator]() { return {
+  next() { failureReads++; return failureReads === 1
+    ? Promise.resolve({done:false,value:{type:'finish',reason:{kind:'error',failure:{code:'CONTEXT_WINDOW_EXCEEDED',message:'PRIVATE'}}}})
+    : new Promise(()=>{}); },
+  return() { return new Promise(()=>{}); },
+}; } });
+await assert.rejects(readDecision(llm.stream(reviewRequest())), /context window/);
+assert.equal(failureReads,1);
+assert.equal(backendCalls,1);
+backendFactory = undefined;
+console.log('PASS native parser: failed finish stops immediately without iterator close');
+
+// Native event-loop scheduling, real Cordis disposal and the native parser must
+// all see cancellation before a fast microtask-only provider publishes a verdict.
+let fastReads = 0, fastClosed = false;
+backendFactory = () => (async function* () {
+  try {
+    for (let i = 0; i < 50000; i++) {
+      fastReads++;
+      yield { type: 'reasoning-delta', index: 0, text: 'x' };
+    }
+    for (const c of response(deny)) yield c.index === undefined ? c : { ...c, index: 1 };
+  } finally { fastClosed = true; }
+})();
+backendCalls = 0;
+const fastController = new AbortController();
+const cancelTimer = setTimeout(() => fastController.abort(), 5);
+try {
+  await assert.rejects(readDecision(llm.stream(reviewRequest({ signal: fastController.signal }))));
+  assert.ok(fastReads > 0 && fastReads < 50000);
+  assert.equal(fastClosed, true);
+  assert.equal(backendCalls, 1);
+} finally { clearTimeout(cancelTimer); }
+console.log('PASS real native parser: timer cancellation interrupts fast source without retry or verdict');
+
+backendCalls = 0; fastReads = 0; fastClosed = false;
+let disposal;
+const unloadTimer = setTimeout(() => { disposal = fiber.dispose(); }, 5);
+try {
+  await assert.rejects(readDecision(llm.stream(reviewRequest())));
+  await disposal;
+  assert.ok(fastReads > 0 && fastReads < 50000);
+  assert.equal(fastClosed, true);
+  assert.equal(backendCalls, 1);
+} finally { clearTimeout(unloadTimer); await fiber.dispose(); }
+backendFactory = undefined;
+console.log('PASS real Cordis: timer unload interrupts fast source without retry or verdict');
+
 backendCalls = 0; responses = ['unmodified content'];
 const after = [];
 for await (const chunk of llm.stream(reviewRequest())) after.push(chunk);

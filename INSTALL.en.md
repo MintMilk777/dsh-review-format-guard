@@ -2,16 +2,16 @@
 
 [中文](INSTALL.md) · [Home](README.md) · [Troubleshooting](docs/TROUBLESHOOTING.en.md)
 
-These instructions cover plugin v0.1.2. The current tested desktop setup is DSH 0.2.2-rc.1 on Windows. Other versions are discussed in [Compatibility](COMPATIBILITY.en.md).
+These instructions cover plugin v0.1.3. The current tested desktop setup is DSH 0.2.2-rc.3 on Windows. Other versions are discussed in [Compatibility](COMPATIBILITY.en.md).
 
 ## Download
 
-Download [dsh-review-format-guard-0.1.2.tgz](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.2/dsh-review-format-guard-0.1.2.tgz) from the release page. Keep the file as `.tgz`; do not unpack it. `source-v0.1.2.zip` is the source archive. `SHA256SUMS.txt` contains the checksums for the attached plugin and source archives.
+Download [dsh-review-format-guard-0.1.3.tgz](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.3/dsh-review-format-guard-0.1.3.tgz) from the release page. Keep the file as `.tgz`; do not unpack it. `dsh-review-format-guard-source-v0.1.3.zip` is the source archive. `SHA256SUMS.txt` contains the checksums for the attached plugin and source archives.
 
 ## Option 1: DSH's plugin page
 
 1. Open DSH's plugin page and choose **Add plugin / Install a third-party plugin**. Labels can vary by DSH version.
-2. Enter the npm package name **`dsh-review-format-guard@0.1.2`**. You can also use the absolute path to the downloaded `.tgz`, or the [direct archive URL](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.2/dsh-review-format-guard-0.1.2.tgz).
+2. Enter the npm package name **`dsh-review-format-guard@0.1.3`**. You can also use the absolute path to the downloaded `.tgz`, or the [direct archive URL](https://github.com/MintMilk777/dsh-review-format-guard/releases/download/v0.1.3/dsh-review-format-guard-0.1.3.tgz).
 3. Review the package details and confirm installation. Restart if DSH asks you to, then check that `dsh-review-format-guard` is enabled.
 
 If your version's dialog does not accept the package name or archive, use the bundled command below.
@@ -21,10 +21,10 @@ If your version's dialog does not accept the package name or archive, use the bu
 Open DSH once to initialize its desktop profile, then **fully quit it** before using its command-line plugin manager. Find the folder containing `DeepSeek Harness.exe` and open PowerShell there. Use DSH's own `resources/runtime/cli/bin/dsh.cmd`, rather than a separately installed npm copy of `dsh`.
 
 ```powershell
-& "./resources/runtime/cli/bin/dsh.cmd" plugin --profile desktop add dsh-review-format-guard@0.1.2 --ignore-scripts
+& "./resources/runtime/cli/bin/dsh.cmd" plugin --profile desktop add dsh-review-format-guard@0.1.3 --ignore-scripts
 ```
 
-To install a downloaded archive instead, replace `dsh-review-format-guard@0.1.2` with its quoted absolute file path.
+To install a downloaded archive instead, replace `dsh-review-format-guard@0.1.3` with its quoted absolute file path.
 
 The `desktop` profile is the desktop app's plugin setup. `--ignore-scripts` tells the package manager not to run package lifecycle scripts; this plugin needs none.
 
@@ -35,7 +35,7 @@ If the command file is missing, check your DSH installation path instead of edit
 For a non-desktop setup with the matching `dsh` command available:
 
 ```sh
-dsh plugin --profile web add dsh-review-format-guard@0.1.2 --ignore-scripts
+dsh plugin --profile web add dsh-review-format-guard@0.1.3 --ignore-scripts
 ```
 
 Replace `web` with the profile you actually run. A normal `npm install` in an unrelated directory does not mount a plugin in DSH.
@@ -69,7 +69,7 @@ Reopen DSH afterward. This removes this plugin, not the built-in auto-review com
 ## Verify a download (optional)
 
 ```powershell
-Get-FileHash -Algorithm SHA256 "C:/path/to/dsh-review-format-guard-0.1.2.tgz"
+Get-FileHash -Algorithm SHA256 "C:/path/to/dsh-review-format-guard-0.1.3.tgz"
 ```
 
 Compare the result with the matching filename in the release's `SHA256SUMS.txt`. Download the checksum file and archive from the same release.

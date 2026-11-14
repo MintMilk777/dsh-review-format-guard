@@ -146,6 +146,24 @@ backendFactory = undefined;
 
 
 backendCalls = 0;
+for (const [position, type, blank] of [['before','text',''],['before','text',' \n'],['after','text',''],['after','text',' \n'],['after','reasoning',' \n']]) {
+  const extra = [{type:'block-start',index:position==='before'?0:1,blockType:type},
+    {type:type==='text'?'text-delta':'reasoning-delta',index:position==='before'?0:1,text:blank},
+    {type:'block-end',index:position==='before'?0:1,block:{type,text:blank}}];
+  const verdict = response(deny).slice(0,-1).map(c=>({...c,index:position==='before'?1:0}));
+  backendCalls=0;
+  backendFactory=()=> (async function*(){yield* (position==='before'?[...extra,...verdict]:[...verdict,...extra]);yield {type:'finish',reason:{kind:'stop'},replayState:{synthetic:'stale'}};})();
+  assert.equal((await readDecision(llm.stream(reviewRequest()))).decision,'deny');
+  assert.equal(backendCalls,1);
+}
+backendFactory=undefined;
+console.log('PASS real native parser: whole blank blocks normalize without changing or retrying a refusal');
+backendCalls=0;
+backendFactory=()=> (async function*(){yield* response(deny).slice(0,-1);yield* response(allow).map(c=>c.index===undefined?c:{...c,index:1});})();
+await assert.rejects(readDecision(llm.stream(reviewRequest())),/Review format guard/);
+assert.equal(backendCalls,3);backendFactory=undefined;
+console.log('PASS real native parser: meaningful extra conclusions remain invalid after bounded retries');
+backendCalls=0;
 let failureReads = 0;
 backendFactory = () => ({ [Symbol.asyncIterator]() { return {
   next() { failureReads++; return failureReads === 1

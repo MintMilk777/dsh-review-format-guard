@@ -110,7 +110,7 @@ test('failure history records every bounded attempt and redacts forged internal 
   const out = await collect(h.ctx.llm.stream(reviewRequest()));
   assert.equal(h.calls.length, 3);
   const message = out.at(-1).reason.failure.message;
-  assert.match(message, /1:REVIEW_STREAM_INVALID:\d+ms, 2:REVIEW_UPSTREAM_SERVER:\d+ms, 3:REVIEW_STREAM_INVALID:\d+ms/);
+  assert.match(message, /1:REVIEW_STREAM_INVALID\(missing-finish\):\d+ms, 2:REVIEW_UPSTREAM_SERVER:\d+ms, 3:REVIEW_STREAM_INVALID:\d+ms/);
   assert.equal(JSON.stringify([out,h.logs]).includes('SECRET'), false);
   h.dispose();
 });

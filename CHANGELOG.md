@@ -1,5 +1,13 @@
 # Changelog / 更新记录
 
+## 0.1.3 · 2026-11-14
+
+- Clarify that the last tool-call record is the action awaiting review. Preserve the original policy, source roles, history, and pending arguments.
+- Distinguish fixed stream failure categories without logging response text or tool arguments. Validation, denial handling, retry limits, and waiting defaults remain unchanged.
+- Remove verified whitespace-only blocks around a verdict so the normalized response also satisfies DSH's native parser; preserve meaningful content and invalidate stale replay metadata.
+
+明确最后一条工具调用记录就是当前待审查动作，减少模型误把它当成历史、继续等待下一条请求的情况。保留原规则、来源角色、历史和参数；细分流结构错误，便于定位断流、正文缺失和内容冲突，不记录原始回复或工具参数。确认仅含空白的内容块会整体移除，使结论能被原生解析器读取；有效内容保留，失效重放元数据清除。校验、合法拒绝、重试次数和等待默认值不变。
+
 ## 0.1.2
 
 - Add per-attempt total / first-content / idle deadlines of 180 / 120 / 30 seconds, preserving explicit older settings.

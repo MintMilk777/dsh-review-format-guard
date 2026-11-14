@@ -24,7 +24,7 @@
 | `REVIEW_TIMEOUT` | 有限重试。单次总期限、首内容或空闲期限到期；安全错误说明会指出阶段。检查是否显式保留了较短的 `timeoutMs` |
 | `REVIEW_CANCELLED` | 不重试。请求取消或插件卸载 |
 | `REVIEW_JSON_INVALID`、`REVIEW_SCHEMA_INVALID`、`REVIEW_DUPLICATE_KEYS`、`REVIEW_TEXT_MISSING` | 有限重试。结论缺失、JSON 不完整、字段不符或重复；不要手工拼凑允许结论 |
-| `REVIEW_STREAM_INVALID` | 受 `retries` 限制，最多三次。流中确认结构或内容冲突就结束本次尝试；成功仍须完整校验 |
+| `REVIEW_STREAM_INVALID` | 受 `retries` 限制，最多三次。固定分类会区分动作块（`action-block`）、快照冲突（`snapshot-conflict`）、缺少最终正文（`missing-conclusion`）、多个正文块（`block-order`）、输出截断（`output-limit`）及缺少结束信号（`missing-finish`）等情况；未知原因仍只给出通用错误。成功仍须完整校验，不会从思考或工具调用中拼出允许结论 |
 | `REVIEW_SIZE_LIMIT` | 资源超限后最多共尝试两次，受 `retries` 限制（0 为一次，1 最多两次）；若前两次是其他错误、第三次才首次超限，则直接结束。安全说明会指出触及的预算，见[流缓冲预算](TECHNICAL.md#流缓冲预算) |
 | `REVIEW_UPSTREAM_UNSUPPORTED_REASONING_EFFORT` | 不重试。当前通道不支持请求的思考档位。DSH 可在本机以 `UNSUPPORTED_REASONING_EFFORT` 拒绝不支持的 `reasoningEffort=max` 调用，尚未发出网络请求。核对通道能力与调用设置；插件不会静默降档、换模型或改写模型的审查判断 |
 | `REVIEW_UPSTREAM_AUTH` | 不重试。认证失败或凭据无效、缺失；检查服务配置，不要公开凭据 |

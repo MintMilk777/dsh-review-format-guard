@@ -10,11 +10,13 @@ The plugin registers a prepended `llm/stream` listener. It does not replace DSH'
 
 By default, provider/model names do not decide whether a request is handled. The optional `providerIds` list can narrow provider routes; an empty list leaves all recognized native-review routes eligible.
 
-The original policy and data are retained. For legacy requests the policy is repeated after the four sections. For ordered requests it is repeated only in the first environment message; later JSON records, source roles, session identity and purpose remain unchanged, with the pending call still last. This may help gateways that ignore or replace system messages, but it still relies on model compliance. It is not a deterministic repair of meaning.
+The original policy and data are retained. For legacy requests the policy is repeated after the four sections. For ordered requests the first environment message clarifies record boundaries and repeats the policy: the final tool-call record is already pending review, even when a transport combines adjacent user messages. Later JSON records, source roles, session identity and purpose remain unchanged, with the pending call still last. This may reduce cases where a reviewer mistakes the action for history or continues the conversation, but it still relies on model compliance. It is not a deterministic repair of meaning.
 
 ## Response handling
 
 Each received chunk is copied before the next one can mutate it. Block structure and consistency are checked as events arrive, so definite failures end the attempt promptly with a safe reason. Successful output remains buffered until the whole stream, finish status, content consistency, and native risk/decision schema pass validation.
+
+After full validation, blocks confirmed to contain only whitespace are removed as complete blocks, including their start, delta, and end events. This aligns the output with the native parser, which otherwise counts blank blocks as extra content. Meaningful text, reasoning, metadata on retained blocks, and usage events remain intact. Any changed response drops stale finish replay metadata. All received events still count toward collection budgets before normalization.
 
 Normalization is limited to a whole-response JSON code fence, outer whitespace, an initial byte-order mark, and a checked whitespace-only mismatch in reasoning snapshots. Verdict delta/snapshot conflicts, duplicate keys, multiple objects, prose, and tool-call markup remain errors. The plugin never extracts an allow from arbitrary text.
 
@@ -48,7 +50,7 @@ Defaults for the development API `apply(ctx, options)`:
 }
 ```
 
-These options are supplied through the code API; no settings panel is included. The runtime uses Node.js built-ins, has no third-party runtime dependencies, and reads neither configuration files nor app.asar. Logs contain request sequence, attempt counts, normalization status, safe error codes, and elapsed milliseconds. A short failed-attempt history is retained in success logs and final failures; raw requests, replies, and upstream error text are excluded.
+These options are supplied through the code API; no settings panel is included. The runtime uses Node.js built-ins, has no third-party runtime dependencies, and reads neither configuration files nor app.asar. Logs contain request sequence, attempt counts, normalization status, safe error codes, and elapsed milliseconds. A short failed-attempt history is retained in success logs and final failures. Stream errors can identify fixed categories such as a missing conclusion, an action block, a snapshot conflict, or truncated output; raw requests, replies, and upstream error text are excluded.
 
 The package has no `engines.dsh` installation range. Runtime handling still requires a recognized policy fingerprint and request structure.
 
